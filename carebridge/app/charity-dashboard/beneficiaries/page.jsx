@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import axios from "axios";
 
 const ageGroups = ["Children", "Teens", "Adults", "Elderly"];
 const aidTypes = ["Sanitary Pads", "Clean Water", "Food Supplies", "Medical Aid"];
@@ -13,6 +14,26 @@ const Beneficiaries = () => {
   ]);
 
   const [filters, setFilters] = useState({ location: "", ageGroup: "", aidReceived: "" });
+
+  const Beneficiaries = () => {
+    const [beneficiaries, setBeneficiaries] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [filters, setFilters] = useState({ location: "", ageGroup: "", aidReceived: "" });
+  
+    useEffect(() => {
+      axios
+        .get("https://carebridge-backend-fys5.onrender.com//beneficiaries") // Change URL if hosted
+        .then((response) => {
+          setBeneficiaries(response.data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError(err.message);
+          setLoading(false);
+        });
+    }, []); 
+  }
 
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
@@ -72,13 +93,7 @@ const Beneficiaries = () => {
         </table>
       </div>
 
-      {/* Reports */}
-      <div className="p-4 shadow-lg bg-white w-full rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">Generate Reports</h2>
-        <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-          Download Report
-        </button>
-      </div>
+  
     </div>
   );
 };

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import axios from "axios";
 
 // Dashboard Card Component (Replaces Missing Card)
 const DashboardCard = ({ title, value, color }) => (
@@ -22,15 +23,26 @@ const HomePage = () => {
   });
 
   useEffect(() => {
-    // Simulating API call (Replace this with real fetch)
-    setTimeout(() => {
-      setStats({
-        totalDonations: 50000,
-        activeBeneficiaries: 120,
-        impactStories: 35,
+    axios
+      .get("https://carebridge-backend-fys5.onrender.com/dashboard-stats") // Change if hosted
+      .then((response) => {
+        setStats(response.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
       });
-    }, 1000);
+      setTimeout(() => {
+        setStats({
+          totalDonations: 50000,
+          activeBeneficiaries: 120,
+          impactStories: 35,
+        });
+      }, 1000);
   }, []);
+
+  
 
   return (
     <div className="p-6 min-h-screen bg-gray-100 w-full">
@@ -48,15 +60,14 @@ const HomePage = () => {
           title="Active Beneficiaries"
           value={stats.activeBeneficiaries}
           color="text-blue-600"
-        />
-        <DashboardCard
-          title="Impact Stories"
-          value={stats.impactStories}
-          color="text-purple-600"
-        />
+        /><DashboardCard
+        title="Impact Stories"
+        value={stats.impactStories}
+        color="text-purple-600"
+      />
       </div>
 
-      {/* Sample Button (Replace Missing Button Component) */}
+      {/* Sample Button (Replace Missing Button Component)  */}
       <div className="text-center mt-6">
         <Link href="/donate">
           <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition">
