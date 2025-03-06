@@ -22,7 +22,7 @@ const ImpactStories = () => {
               <th className="border p-2">Title</th>
               <th className="border p-2">Category</th>
               <th className="border p-2">Description</th>
-              <th className="border p-2">Actions</th>
+            
             </tr>
           </thead>
           <tbody>
@@ -31,9 +31,6 @@ const ImpactStories = () => {
                 <td className="border p-2">{story.title}</td>
                 <td className="border p-2">{story.category}</td>
                 <td className="border p-2">{story.description}</td>
-                <td className="border p-2">
-                  <Link href={`/impact-stories/${story.id}`} className="text-blue-500 hover:underline">View</Link>
-                </td>
               </tr>
             ))}
           </tbody>
