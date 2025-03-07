@@ -75,7 +75,7 @@ const DonationForm = ({ setShowForm, addDonation, user, donation, fetchDonations
 
     setError("");
 
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("token");
     if (!token || token === "undefined") {
       setError("Session expired. Please log in again.");
       return;
@@ -93,7 +93,7 @@ const DonationForm = ({ setShowForm, addDonation, user, donation, fetchDonations
     };
 
     try {
-      const response = await fetch("http://localhost:5000/create-paypal-payment", {
+      const response = await fetch("https://carebridge-backend-fys5.onrender.com/create-paypal-payment", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -120,14 +120,14 @@ const DonationForm = ({ setShowForm, addDonation, user, donation, fetchDonations
 
     if (orderID) {
       const capturePayment = async () => {
-        const token = localStorage.getItem("access_token");
+        const token = localStorage.getItem("token");
         if (!token || token === "undefined") {
           setError("Session expired. Please log in again.");
           return;
         }
 
         try {
-          const response = await fetch("http://localhost:5000/execute-paypal-payment", {
+          const response = await fetch("https://carebridge-backend-fys5.onrender.com/execute-paypal-payment", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
