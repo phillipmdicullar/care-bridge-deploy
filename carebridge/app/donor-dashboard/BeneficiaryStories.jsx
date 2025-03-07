@@ -9,7 +9,7 @@ const BeneficiaryStories = () => {
   useEffect(() => {
     const fetchStoriesAndBeneficiaries = async () => {
       try {
-        const token = localStorage.getItem("access_token");
+        const token = localStorage.getItem("token");
         const response = await fetch("https://carebridge-backend-fys5.onrender.com/donor/beneficiary-stories", {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -46,7 +46,7 @@ const Dashboard = () => {
 
   // Fetch donations from backend
   const fetchDonations = async () => {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("token");
     if (!token) {
       console.error("No token found. User must be logged in.");
       return;
@@ -80,14 +80,14 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem("access_token");
+      const token = localStorage.getItem("token");
       if (!token) {
         console.error("No token found. User must be logged in.");
         return;
       }
   
       try {
-        const response = await fetch("http://localhost:5000/user", {
+        const response = await fetch("https://carebridge-backend-fys5.onrender.com/user", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -116,7 +116,7 @@ const Dashboard = () => {
 
   // Function to handle donation deletion
   const handleDeleteDonation = async (donationId) => {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("token");
     if (!token) {
       console.error("No token found. User must be logged in.");
       return;
