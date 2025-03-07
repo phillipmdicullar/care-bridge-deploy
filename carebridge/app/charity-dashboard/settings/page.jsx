@@ -83,6 +83,9 @@ const Settings = () => {
     }
   };
 
+
+  
+
   return (
     <div className="p-6 min-h-screen bg-gray-100 w-full">
       <h1 className="text-3xl font-bold mb-6 text-center text-blue-600">Settings</h1>
