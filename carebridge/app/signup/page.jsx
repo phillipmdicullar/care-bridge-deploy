@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import axios from "axios";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import Link from "next/link";
@@ -36,94 +36,98 @@ const SignupPage = () => {
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
-    console.log("Sending signup request:", values);
+    console.log("Sending signup request:", values); // Debugging
+
     try {
-      const response = await fetch("https://carebridge-backend-fys5.onrender.com/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: values.username,
-          email: values.email,
-          password: values.password,
-          confirmPassword: values.confirmPassword,
-          role: values.role || "donor",
-        }),
+      const response = await axios.post("http://localhost:5000/auth/register", {
+        username: values.username,
+        email: values.email,
+        password: values.password,
+        confirmPassword: values.confirmPassword, // Ensure confirmPassword is sent
+        role: values.role || "donor", // Default to "donor" if empty
       });
-      const responseData = await response.json();
-      console.log("Response from backend:", responseData);
-      if (!response.ok) throw new Error(responseData.error || "Signup failed");
-      console.log("Signup successful!");
-      router.push("/login");
+
+      console.log("Signup Success:", response.data);
+      router.push("/login"); // Redirect to login after successful signup
     } catch (error) {
-      console.error("Signup failed:", error.message);
-      alert(`Signup failed: ${error.message}`);
+      console.error("Signup failed:", error.response?.data || error.message);
+      alert(`Signup failed: ${error.response?.data?.error || error.message}`);
     }
+
     setSubmitting(false);
   };
 
-  const handleGoogleSignup = () => {
-    signIn("google", { callbackUrl: "/dashboard" });
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('https://salvusmission.org/wp-content/uploads/2024/02/Untitled-design-45.png')" }}>
-      <div className="max-w-md w-full bg-white bg-opacity-90 p-6 shadow-lg rounded-xl">
-        <h2 className="text-2xl font-bold text-center mb-4 text-black">Sign Up</h2>
-        <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
-          {({ isSubmitting }) => (
-            <Form className="space-y-4">
-              <div>
-                <label className="block text-black">Username</label>
-                <Field type="text" name="username" className="w-full p-2 border rounded text-black" placeholder="Enter your username" />
-                <ErrorMessage name="username" component="p" className="text-red-500 text-sm" />
-              </div>
-              <div>
-                <label className="block text-black">Email</label>
-                <Field type="email" name="email" className="w-full p-2 border rounded text-black" placeholder="Enter your email" />
-                <ErrorMessage name="email" component="p" className="text-red-500 text-sm" />
-              </div>
-              <div className="relative">
-                <label className="block text-black">Password</label>
-                <Field type={showPassword ? "text" : "password"} name="password" className="w-full p-2 border rounded text-black" placeholder="Enter your password" />
-                <span className="absolute right-3 top-9 cursor-pointer text-gray-600" onClick={togglePasswordVisibility}>
+    <div className="flex flex-col items-center justify-center min-h-screen py-2">
+      <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
+      <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
+        {({ isSubmitting }) => (
+          <Form className="w-80 p-6 bg-white shadow-md rounded-lg">
+            <div className="mb-4">
+              <label className="block text-sm font-medium">Username</label>
+              <Field type="text" name="username" className="w-full p-2 border rounded" />
+              <ErrorMessage name="username" component="div" className="text-red-500 text-sm" />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium">Email</label>
+              <Field type="email" name="email" className="w-full p-2 border rounded" />
+              <ErrorMessage name="email" component="div" className="text-red-500 text-sm" />
+            </div>
+
+            <div className="mb-4 relative">
+              <label className="block text-sm font-medium">Password</label>
+              <div className="flex items-center">
+                <Field type={showPassword ? "text" : "password"} name="password" className="w-full p-2 border rounded" />
+                <button type="button" onClick={togglePasswordVisibility} className="absolute right-2 text-gray-500">
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </span>
-                <ErrorMessage name="password" component="p" className="text-red-500 text-sm" />
+                </button>
               </div>
-              <div className="relative">
-                <label className="block text-black">Confirm Password</label>
-                <Field type={showConfirmPassword ? "text" : "password"} name="confirmPassword" className="w-full p-2 border rounded text-black" placeholder="Confirm your password" />
-                <span className="absolute right-3 top-9 cursor-pointer text-gray-600" onClick={toggleConfirmPasswordVisibility}>
+              <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
+            </div>
+
+            <div className="mb-4 relative">
+              <label className="block text-sm font-medium">Confirm Password</label>
+              <div className="flex items-center">
+                <Field type={showConfirmPassword ? "text" : "password"} name="confirmPassword" className="w-full p-2 border rounded" />
+                <button type="button" onClick={toggleConfirmPasswordVisibility} className="absolute right-2 text-gray-500">
                   {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                </span>
-                <ErrorMessage name="confirmPassword" component="p" className="text-red-500 text-sm" />
+                </button>
               </div>
-              <div>
-                <label className="block text-black">Select Role</label>
-                <Field as="select" name="role" className="w-full p-2 border rounded text-black">
-                  <option value="">Choose a role...</option>
-                  <option value="admin">Admin</option>
-                  <option value="donor">Donor</option>
-                  <option value="charity">Charity</option>
-                </Field>
-                <ErrorMessage name="role" component="p" className="text-red-500 text-sm" />
-              </div>
-              <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded transition-colors duration-300 hover:bg-blue-800" disabled={isSubmitting}>
-                {isSubmitting ? "Signing Up..." : "Sign Up"}
+              <ErrorMessage name="confirmPassword" component="div" className="text-red-500 text-sm" />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium">Role</label>
+              <Field as="select" name="role" className="w-full p-2 border rounded">
+                <option value="">Select Role</option>
+                <option value="admin">Admin</option>
+                <option value="donor">Donor</option>
+                <option value="charity">Charity</option>
+              </Field>
+              <ErrorMessage name="role" component="div" className="text-red-500 text-sm" />
+            </div>
+
+            <button type="submit" disabled={isSubmitting} className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+              {isSubmitting ? "Signing up..." : "Sign Up"}
+            </button>
+
+            <div className="text-center mt-4">
+              <p>Or sign up with</p>
+              <button type="button" className="flex items-center justify-center w-full py-2 mt-2 border rounded hover:bg-gray-100">
+                <FcGoogle className="mr-2" /> Google
               </button>
-              <button type="button" onClick={handleGoogleSignup} className="w-full flex items-center justify-center space-x-2 bg-gray-100 text-black py-2 rounded mt-2 hover:bg-gray-200">
-                <FcGoogle className="text-xl" />
-                <span>Sign up with Google</span>
-              </button>
-            </Form>
-          )}
-        </Formik>
-        <p className="mt-4 text-center text-black">
-          Already have an account? <Link href="/login" className="text-blue-600 hover:text-blue-800">Login here</Link>
-        </p>
-      </div>
+            </div>
+
+            <p className="text-center mt-4">
+              Already have an account? <Link href="/login" className="text-blue-500">Login</Link>
+            </p>
+          </Form>
+        )}
+      </Formik>
     </div>
   );
 };
 
 export default SignupPage;
+
