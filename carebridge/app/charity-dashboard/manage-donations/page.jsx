@@ -7,9 +7,10 @@ const ManageDonations = ({ apiUrl = "" }) => {
   const [donations, setDonations] = useState([]);
   const [filteredDonations, setFilteredDonations] = useState([]);
   const [filter, setFilter] = useState({ date: "", amount: "", type: "" });
-  const [balance, setBalance] = useState(50000); // Dummy balance
+  const [balance, setBalance] = useState(0); // Initial balance
   const charityId = "charity_1"; // Replace with dynamic charity ID
 
+  // Fetch donations and balance on component load
   useEffect(() => {
     if (apiUrl) {
       fetch(apiUrl)
@@ -20,8 +21,21 @@ const ManageDonations = ({ apiUrl = "" }) => {
         })
         .catch((error) => console.error("Error fetching donations:", error));
     }
-  }, [apiUrl]);
 
+    // Fetch charity balance
+    const fetchBalance = async () => {
+      try {
+        const response = await axios.get(`https://carebridge-backend-fys5.onrender.com/api/charity/${charityId}/balance`);
+        setBalance(response.data.balance);
+      } catch (error) {
+        console.error("Error fetching balance:", error);
+      }
+    };
+
+    fetchBalance();
+  }, [apiUrl, charityId]);
+
+  // Filter donations based on filter criteria
   useEffect(() => {
     const filtered = donations.filter((donation) => {
       return (
@@ -33,11 +47,13 @@ const ManageDonations = ({ apiUrl = "" }) => {
     setFilteredDonations(filtered);
   }, [filter, donations]);
 
+  // Handle filter input changes
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilter((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handle withdrawal of funds
   const handleWithdraw = async () => {
     const amount = prompt("Enter amount to withdraw:");
     if (!amount || isNaN(amount) || amount <= 0) return alert("Invalid amount!");
