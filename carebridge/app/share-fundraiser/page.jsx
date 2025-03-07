@@ -1,11 +1,20 @@
 "use client";
-import { useState } from "react";
+
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Facebook, Twitter, Link as LinkIcon, Mail, Copy, QrCode } from "lucide-react";
+import { Facebook, Twitter, Copy, Mail } from "lucide-react";
 import { Button } from "../components/ui/button";
 import QRCode from "react-qr-code";
 
 export default function ShareFundraiser() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ShareFundraiserContent />
+    </Suspense>
+  );
+}
+
+function ShareFundraiserContent() {
   const searchParams = useSearchParams();
   const fundraiserTitle = searchParams.get("title") || "Support a Great Cause!";
   const fundraiserUrl = searchParams.get("url") || "https://yourfundraiser.com/example";

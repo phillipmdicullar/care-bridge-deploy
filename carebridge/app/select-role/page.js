@@ -1,16 +1,27 @@
 "use client";
-import React, { useEffect } from "react";
+
+import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import jwtDecode from "jwt-decode"; // Import jwt-decode to decode the JWT token
+import { jwtDecode } from "jwt-decode";
 
 const SelectRole = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SelectRoleContent />
+    </Suspense>
+  );
+};
+
+const SelectRoleContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    console.log("Search Params:", searchParams.toString()); // Log the entire search params
-    console.log("Token from URL:", token); // Log the token
+    console.log("Search Params:", searchParams.toString());
+    console.log("Token from URL:", token);
   }, [searchParams, token]);
 
   const handleRoleSelection = async (role) => {
@@ -19,6 +30,7 @@ const SelectRole = () => {
       return;
     }
 
+    setLoading(true);
     try {
       const response = await fetch("https://carebridge-backend-fys5.onrender.com/auth/select-role", {
         method: "POST",
@@ -30,37 +42,30 @@ const SelectRole = () => {
       });
 
       const data = await response.json();
-      console.log("Response from backend:", data); // Debugging
+      console.log("Response from backend:", data);
 
       if (response.ok) {
-        console.log("Role selected successfully:", data);
-        if (data.redirect) {
-          // Save the role in local storage
-          localStorage.setItem("role", role);
-          router.push(data.redirect); // Redirect to the appropriate dashboard
-        } else {
-          console.error("Redirect URL not found in response:", data);
-          router.push("/fallback-route"); // Redirect to a default route
-        }
+        localStorage.setItem("role", role);
+        router.push(data.redirect || "/fallback-route");
       } else {
-        // Handle cases where the backend returns an error
         console.error("Error selecting role:", data.error || "Unknown error");
       }
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Check if the user is already logged in and redirect them to their dashboard
+  // Check for existing login session and redirect
   useEffect(() => {
     const storedToken = localStorage.getItem("access_token");
 
     if (storedToken) {
       try {
-        const decodedToken = jwtDecode(storedToken); // Decode the JWT token
-        const role = decodedToken.role; // Extract the role from the token
+        const decodedToken = jwtDecode(storedToken);
+        const role = decodedToken.role;
 
-        // Redirect to the appropriate dashboard based on the role
         if (role === "admin") {
           router.push("/admin-dashboard");
         } else if (role === "charity") {
@@ -70,8 +75,8 @@ const SelectRole = () => {
         }
       } catch (error) {
         console.error("Error decoding token:", error);
-        localStorage.removeItem("access_token"); // Clear invalid token
-        router.push("/login"); // Redirect to login page
+        localStorage.removeItem("access_token");
+        router.push("/login");
       }
     }
   }, [router]);
@@ -82,21 +87,24 @@ const SelectRole = () => {
         <h1 className="text-2xl font-bold mb-4">Select Your Role</h1>
         <button
           onClick={() => handleRoleSelection("donor")}
-          className="w-full bg-blue-600 text-white py-2 rounded mb-2 hover:bg-blue-700"
+          className={`w-full py-2 rounded mb-2 text-white ${loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}`}
+          disabled={loading}
         >
-          Donor
+          {loading ? "Processing..." : "Donor"}
         </button>
         <button
           onClick={() => handleRoleSelection("charity")}
-          className="w-full bg-green-600 text-white py-2 rounded mb-2 hover:bg-green-700"
+          className={`w-full py-2 rounded mb-2 text-white ${loading ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"}`}
+          disabled={loading}
         >
-          Charity
+          {loading ? "Processing..." : "Charity"}
         </button>
         <button
           onClick={() => handleRoleSelection("admin")}
-          className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700"
+          className={`w-full py-2 rounded text-white ${loading ? "bg-gray-400" : "bg-red-600 hover:bg-red-700"}`}
+          disabled={loading}
         >
-          Admin
+          {loading ? "Processing..." : "Admin"}
         </button>
       </div>
     </div>
