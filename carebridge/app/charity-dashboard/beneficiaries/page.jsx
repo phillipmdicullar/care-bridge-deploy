@@ -93,7 +93,7 @@ const Beneficiaries = () => {
         </table>
       </div>
 
-  
+      
     </div>
   );
 };
